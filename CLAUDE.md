@@ -7,8 +7,8 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) (process, definition of done) and
 
 ```bash
 pip install -e ".[dev]"          # add ,data for the live-data example
-pytest -q                        # ~20 s
-cd examples && python 01_var_backtesting.py   # 02 takes ~1-2 min; 04 needs network
+pytest -q                        # ~40 s
+cd examples && python 01_var_backtesting.py   # 02 ~1.5 min, 05 ~4 min; 04 needs network
 ```
 
 ## Rules that are easy to break

@@ -41,7 +41,7 @@ Until the team grows, the maintainer owns everything; replace the names as peopl
 
 | Area | Files | Owner responsibilities |
 |---|---|---|
-| Volatility models | `garch.py`, `var.py` | Estimator correctness, no look-ahead in rolling forecasts, Study 1 numbers |
+| Volatility models | `garch.py`, `var.py`, `multivariate.py` | Estimator correctness, no look-ahead in rolling forecasts, Study 1 and 5 numbers |
 | Backtests | `backtests.py` | Test statistics match the cited papers; critical values documented |
 | Option risk | `nonlinear.py` | Pricing and Greeks correctness, Study 3 numbers |
 | Covariance & portfolios | `covariance.py`, `portfolio.py` | Estimators match references, Study 2 numbers |

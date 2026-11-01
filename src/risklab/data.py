@@ -52,6 +52,42 @@ def true_garch_t_es(sim: pd.DataFrame, alpha: float = 0.025) -> pd.Series:
     return -mu + sim["sigma"] * es_std_t
 
 
+def simulate_dcc_t(n: int = 3000, params: GarchParams = GarchParams(2e-6, 0.08, 0.90),
+                   rbar: np.ndarray | None = None, a: float = 0.04, b: float = 0.94, nu: float = 6.0,
+                   mu: float = 0.0003, seed: int | None = 0,
+                   start: str | None = "2014-01-01") -> tuple[pd.DataFrame, np.ndarray]:
+    """Multivariate returns: GARCH(1,1) volatilities, DCC correlations, multivariate-t shocks.
+
+    z_t has correlation R_t and unit variances (a standardised multivariate t,
+    i.e. a t-copula with t margins sharing nu). Returns (returns, H) where
+    H[t] is the true conditional covariance on day t. Because the shocks are
+    elliptical, a fixed portfolio w returns w'mu + sqrt(w'H_t w) * (standardised t),
+    so its true VaR and ES follow from `true_garch_t_var` / `true_garch_t_es`.
+    """
+    rbar = np.array([[1, 0.5, 0.3], [0.5, 1, 0.4], [0.3, 0.4, 1]]) if rbar is None else np.asarray(rbar)
+    k = len(rbar)
+    rng = np.random.default_rng(seed)
+    g = rng.standard_normal((n, k))
+    scale = np.sqrt((nu - 2) / rng.chisquare(nu, n))
+    r, H = np.empty((n, k)), np.empty((n, k, k))
+    s2 = np.full(k, params.unconditional_var)
+    Q, z = rbar.copy(), np.zeros(k)
+    for t in range(n):
+        if t:
+            s2 = params.omega + params.alpha * (r[t - 1] - mu) ** 2 + params.beta * s2
+            Q = (1 - a - b) * rbar + a * np.outer(z, z) + b * Q
+        d = np.sqrt(np.diag(Q))
+        R = Q / np.outer(d, d)
+        z = np.linalg.cholesky(R) @ g[t] * scale[t]
+        sd = np.sqrt(s2)
+        r[t] = mu + sd * z
+        H[t] = R * np.outer(sd, sd)
+    idx = pd.RangeIndex(n) if start is None else pd.bdate_range(start, periods=n)
+    out = pd.DataFrame(r, index=idx, columns=[f"asset{i}" for i in range(k)])
+    out.attrs.update(nu=nu, mu=mu)
+    return out, H
+
+
 def block_covariance(n_blocks: int = 5, block_size: int = 10, rho_within: float = 0.6,
                      rho_between: float = 0.2, vol_range=(0.15, 0.40), seed: int | None = 0) -> np.ndarray:
     """Annualised covariance with sector-like correlation blocks."""

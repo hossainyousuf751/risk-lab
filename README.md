@@ -7,6 +7,7 @@ Market risk and portfolio construction, each validated against a known truth:
 - **VaR and Expected Shortfall** by historical simulation, normal, EWMA (RiskMetrics) and
   filtered historical simulation (GARCH + empirical residuals), judged with the formal
   backtests regulators use.
+- **Portfolio VaR from a multivariate model**: DCC-GARCH correlations with a t-copula.
 - **Nonlinear VaR** for option books: delta-normal vs delta-gamma vs full revaluation.
 - **Portfolio construction**: min-variance with sample, Ledoit–Wolf (linear and nonlinear) and
   factor-model covariance, risk parity and Hierarchical Risk Parity, compared on how badly
@@ -17,6 +18,7 @@ pip install -e ".[dev]"
 pytest
 cd examples
 python 01_var_backtesting.py && python 02_portfolio_construction.py && python 03_option_var.py
+python 05_multivariate_var.py      # ~4 min
 pip install -e "..[data]" && python 04_live_spy_and_etfs.py
 ```
 
@@ -26,11 +28,12 @@ pip install -e "..[data]" && python 04_live_spy_and_etfs.py
 |---|---|
 | `garch.py` | GARCH(1,1) by quasi-maximum likelihood |
 | `var.py` | Rolling out-of-sample VaR/ES: historical, normal, EWMA, filtered historical simulation |
+| `multivariate.py` | DCC-GARCH (Engle 2002), t-copula degrees of freedom, rolling portfolio VaR/ES with normal or t-copula shocks |
 | `backtests.py` | Kupiec, Christoffersen independence, Basel traffic light, Acerbi–Székely Z2 for ES |
 | `nonlinear.py` | Option-book VaR by delta-normal, delta-gamma Monte Carlo and full revaluation |
 | `covariance.py` | Sample, Ledoit–Wolf linear shrinkage (matches scikit-learn to 1e-10), Ledoit–Wolf 2020 nonlinear shrinkage, PCA factor model |
 | `portfolio.py` | 1/N, inverse variance, min-variance (long-short and long-only), risk parity, HRP with optional fixed leaf order |
-| `data.py` | GARCH-t returns with exact true VaR/ES; block covariance matrices; Yahoo loader |
+| `data.py` | GARCH-t and DCC-t returns with exact true VaR/ES; block covariance matrices; Yahoo loader |
 
 ## Study 1: which VaR model survives a backtest?
 
@@ -141,12 +144,38 @@ filtered historical simulation has the fewest exceptions by a wide margin.
 | Risk parity | 4.6% | 8.0% | 0.61 | −19% |
 | HRP | 4.0% | 7.3% | 0.57 | −18% |
 
+## Study 5: portfolio VaR from a multivariate model
+
+Three assets with GARCH(1,1) volatilities, DCC correlations and multivariate-t shocks (ν = 6),
+held in fixed weights 50/30/20. The shocks are elliptical, so the portfolio's true VaR and ES are
+known in closed form every day. 2,000 out-of-sample days, 99%:
+
+| Method | Exceptions (20 expected) | Kupiec p | Independence p | VaR error vs true | ES error vs true |
+|---|---|---|---|---|---|
+| Historical, portfolio returns | 22 | 0.658 | 0.484 | 25% | 22% |
+| Filtered historical, portfolio returns | 23 | 0.510 | 0.464 | 8% | 9% |
+| DCC-GARCH, normal shocks | 26 | 0.197 | 0.408 | 12% | 22% |
+| **DCC-GARCH, t-copula** | **20** | 1.000 | 0.525 | **5%** | **7%** |
+| True VaR | 14 | 0.154 | 0.657 | 0% | 0% |
+
+The t-copula model is the most accurate, and the only one that gets ES right without fitting the
+portfolio's own history. DCC with normal shocks gets the correlations right but not the joint
+tails, so its ES is as wrong as historical simulation's.
+
+**Every method passes every backtest here**, including historical simulation with a 25% error.
+Exception counts over eight years can't separate a good model from a mediocre one. Study 1 caught
+the bad models only because they were badly wrong; comparing with the truth is much more sensitive.
+
+Filtered historical simulation on the portfolio's own return series is a strong, much cheaper
+baseline when weights are fixed. The multivariate model earns its cost when weights change, since
+one fit gives the VaR of any portfolio of the same assets.
+
 ## Roadmap
 
 - [x] **M1** VaR/ES models and backtests, option VaR, covariance shrinkage, four portfolio methods, three validation studies
 - [x] **M2** Nonlinear shrinkage (Ledoit–Wolf 2020) and factor-model covariance
 - [x] **M3** Remove HRP's ordering instability from Study 2 (dendrogram bisection tested and rejected; slower re-clustering adopted)
-- [ ] **M4** Multivariate VaR for portfolios with DCC-GARCH and a t-copula
+- [x] **M4** Multivariate VaR for portfolios with DCC-GARCH and a t-copula
 - [ ] **M5** Plug the structured-product pricer in as a nonlinear position: VaR of an autocallable book
 
 ## Contributing
@@ -159,6 +188,7 @@ against a known truth.
 
 - Kupiec, P. (1995). Techniques for verifying the accuracy of risk measurement models. *Journal of Derivatives* 3(2).
 - Christoffersen, P. (1998). Evaluating interval forecasts. *International Economic Review* 39(4).
+- Engle, R. (2002). Dynamic conditional correlation. *Journal of Business & Economic Statistics* 20(3).
 - Barone-Adesi, G., Giannopoulos, K. & Vosper, L. (1999). VaR without correlations for portfolios of derivative securities. *Journal of Futures Markets* 19(5).
 - Acerbi, C. & Székely, B. (2014). Backtesting Expected Shortfall. *Risk*, December.
 - Ledoit, O. & Wolf, M. (2004). A well-conditioned estimator for large-dimensional covariance matrices. *Journal of Multivariate Analysis* 88(2).
