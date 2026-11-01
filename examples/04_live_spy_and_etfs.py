@@ -20,7 +20,10 @@ for fn in (var_es_historical, var_es_normal, var_es_ewma, var_es_fhs):
     print(f"  {bt.method:<11} {bt.exceptions:>3} exceptions (expected {bt.expected:.0f}), "
           f"Kupiec p={bt.kupiec_p:.3f}, independence p={bt.independence_p:.3f}, worst 250d: {bt.worst_250} ({bt.zone})")
 
-# Part B: multi-asset ETF portfolios, monthly rebalanced on a rolling 1-year covariance
+# Part B: multi-asset ETF portfolios, monthly rebalanced on a rolling 1-year covariance.
+# This loop has no costs, no execution lag and no overfitting control. quant-stack's study S3
+# (https://github.com/hossainyousuf751/quant-stack) reruns the same universe and methods through
+# backtest-lab's engine with lag, costs, walk-forward and Deflated Sharpe; prefer its numbers.
 tickers = ["SPY", "EFA", "EEM", "TLT", "IEF", "LQD", "HYG", "GLD", "DBC", "VNQ"]
 rets = load_yfinance(tickers, start="2007-06-01", end=END).pct_change().dropna()
 methods = {"1/N": equal_weight, "inverse variance": inverse_variance, "min-var LW": None,
