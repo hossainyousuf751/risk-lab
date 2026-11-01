@@ -176,7 +176,53 @@ one fit gives the VaR of any portfolio of the same assets.
 - [x] **M2** Nonlinear shrinkage (Ledoit–Wolf 2020) and factor-model covariance
 - [x] **M3** Remove HRP's ordering instability from Study 2 (dendrogram bisection tested and rejected; slower re-clustering adopted)
 - [x] **M4** Multivariate VaR for portfolios with DCC-GARCH and a t-copula
-- [ ] **M5** Plug the structured-product pricer in as a nonlinear position: VaR of an autocallable book
+- [x] **M5** Plug the structured-product pricer in as a nonlinear position: the `Position` protocol,
+      full-revaluation VaR and stress tests here; the autocallable book itself is quant-stack study S2
+
+## Scenarios, full revaluation and stress tests (v0.4, M5)
+
+`risklab.scenarios` computes VaR for any position that can price itself under a scenario. Positions
+satisfy the `Position` protocol, `value(scenario)`, so a structured note repriced by Monte Carlo in
+another library is valued the same way as an option book here, with no import between the two.
+
+```python
+import numpy as np
+from risklab import Portfolio, OptionPosition, gbm_scenarios, full_revaluation_var, stress_test, ledoit_wolf
+
+book = Portfolio(100.0, 0.2, shares=1, options=[OptionPosition(95, 0.25, False, 1)],
+                 vol_fn=lambda K, T: 0.2 - 0.3 * np.log(K / 100), sticky="moneyness")
+scenarios = gbm_scenarios(ledoit_wolf(returns)[0], n_scenarios=20_000, horizon_days=10)
+full_revaluation_var([book], scenarios, alpha=0.01)     # {"var", "es", "pnl"}
+stress_test({"hedged": book})                           # spot -10/-20/-30%, vol +5/+10, combined
+```
+
+- **Scenario** is a batch of spot multipliers per underlying, a parallel vol shift, a skew shift
+  (vol per unit of ln K/S) and elapsed time. Revaluing with elapsed time includes theta.
+- **Generators:**
+  - `historical_scenarios` applies realised h-day returns.
+  - `gbm_scenarios` draws lognormal moves from any daily covariance.
+  - `filtered_historical_scenarios` rescales each historical return by today's GARCH vol over the
+    vol on its own day (Hull & White 1998). The scenarios then reflect current volatility while
+    keeping the empirical tails.
+- **Skew in option books.** `Portfolio(vol_fn=...)` prices each option off a smile, with flat vol
+  as the default. When spot moves, the smile can behave in two ways:
+  - **Sticky strike:** each option keeps the vol of its strike.
+  - **Sticky moneyness:** each option takes the vol of its new moneyness. After a sell-off, a put is
+    nearer the money and its vol falls on a downward skew.
+
+  The two rules give different VaR for the same book (Derman 1999), and quant-stack study S5 measures
+  the difference.
+
+## Part of quant-stack
+
+risk-lab is one of five independent libraries linked in
+[quant-stack](https://github.com/hossainyousuf751/quant-stack). There:
+
+- sp-pricer notes become `Position`s for the VaR of a structured-note book (study S2);
+- volsurface surfaces supply `vol_fn` (study S5);
+- risk-lab's covariance estimators and allocators run through backtest-lab's engine (study S3).
+
+risk-lab installs and tests on its own.
 
 ## Contributing
 
@@ -191,6 +237,8 @@ against a known truth.
 - Engle, R. (2002). Dynamic conditional correlation. *Journal of Business & Economic Statistics* 20(3).
 - Barone-Adesi, G., Giannopoulos, K. & Vosper, L. (1999). VaR without correlations for portfolios of derivative securities. *Journal of Futures Markets* 19(5).
 - Acerbi, C. & Székely, B. (2014). Backtesting Expected Shortfall. *Risk*, December.
+- Hull, J. & White, A. (1998). Incorporating volatility updating into the historical simulation method for value-at-risk. *Journal of Risk* 1(1).
+- Derman, E. (1999). Regimes of volatility. *Risk* 12(4).
 - Ledoit, O. & Wolf, M. (2004). A well-conditioned estimator for large-dimensional covariance matrices. *Journal of Multivariate Analysis* 88(2).
 - Ledoit, O. & Wolf, M. (2020). Analytical nonlinear shrinkage of large-dimensional covariance matrices. *Annals of Statistics* 48(5).
 - Spinu, F. (2013). An algorithm for computing risk parity weights. SSRN 2297383.

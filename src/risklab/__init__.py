@@ -14,14 +14,20 @@ from risklab.nonlinear import OptionPosition, Portfolio, option_portfolio_var
 from risklab.portfolio import (
     equal_weight, hrp, hrp_order, inverse_variance, min_variance, risk_contributions, risk_parity,
 )
+from risklab.scenarios import (
+    DEFAULT_STRESSES, Position, Scenario, filtered_historical_scenarios, full_revaluation_var,
+    gbm_scenarios, historical_scenarios, stress_test,
+)
 from risklab.var import var_es_ewma, var_es_fhs, var_es_historical, var_es_normal
 
 __all__ = [
-    "GarchParams", "OptionPosition", "Portfolio", "VaRBacktest", "acerbi_szekely_z2",
-    "backtest_var", "block_covariance", "christoffersen_independence", "dcc_correlations",
-    "equal_weight", "factor_cov", "fit_dcc", "fit_garch", "fit_t_copula_nu", "garch_variance", "hrp",
+    "DEFAULT_STRESSES", "GarchParams", "OptionPosition", "Portfolio", "Position", "Scenario",
+    "VaRBacktest", "acerbi_szekely_z2", "backtest_var", "block_covariance", "christoffersen_independence",
+    "dcc_correlations", "equal_weight", "factor_cov", "filtered_historical_scenarios", "fit_dcc", "fit_garch",
+    "fit_t_copula_nu",
+    "full_revaluation_var", "garch_variance", "gbm_scenarios", "historical_scenarios", "hrp",
     "hrp_order", "inverse_variance", "kupiec_pof", "ledoit_wolf", "min_variance", "nonlinear_shrinkage",
     "option_portfolio_var", "risk_contributions", "risk_parity", "sample_cov", "simulate_dcc_t",
-    "simulate_garch_t", "traffic_light", "true_garch_t_es", "true_garch_t_var", "var_es_dcc",
+    "simulate_garch_t", "stress_test", "traffic_light", "true_garch_t_es", "true_garch_t_var", "var_es_dcc",
     "var_es_ewma", "var_es_fhs", "var_es_historical", "var_es_normal",
 ]

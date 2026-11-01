@@ -4,7 +4,7 @@ import pytest
 
 from risklab import (
     GarchParams, backtest_var, fit_garch, simulate_garch_t, true_garch_t_es, true_garch_t_var,
-    var_es_fhs, var_es_historical, var_es_normal,
+    var_es_ewma, var_es_fhs, var_es_historical, var_es_normal,
 )
 
 
@@ -38,6 +38,16 @@ def test_forecasts_use_only_past_data(sim):
     full = var_es_historical(r, 0.01, 250)
     cut = var_es_historical(r.iloc[:1500], 0.01, 250)
     pd.testing.assert_series_equal(full["var"].iloc[:1500], cut["var"])
+
+
+@pytest.mark.parametrize("method, kwargs", [(var_es_normal, {"window": 250}), (var_es_ewma, {"warmup": 250}),
+                                            (var_es_fhs, {"window": 500, "refit_every": 50})])
+def test_parametric_forecasts_use_only_past_data(sim, method, kwargs):
+    """The same truncation test for the other rolling methods (docs/CONVENTIONS.md, No look-ahead)."""
+    r = sim["r"].iloc[:900]
+    full = method(r, 0.01, **kwargs)
+    cut = method(r.iloc[:700], 0.01, **kwargs)
+    pd.testing.assert_frame_equal(full.iloc[:700], cut)
 
 
 def test_true_var_passes_and_normal_fails(sim):
