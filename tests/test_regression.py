@@ -12,7 +12,8 @@ from risklab import (
 
 
 def approx(x):
-    return pytest.approx(x, rel=1e-10)
+    # GARCH and portfolio optimisers (SLSQP) move by ~1e-7 relative between supported scipy versions
+    return pytest.approx(x, rel=1e-6)
 
 
 def test_study1_var_backtests():
