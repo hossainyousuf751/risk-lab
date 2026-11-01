@@ -72,6 +72,12 @@ def test_long_only_methods_are_valid(fn):
     assert (w > 0).all() and w.sum() == pytest.approx(1)
 
 
+@pytest.mark.parametrize("fn", [inverse_variance, risk_parity, hrp])
+def test_risk_based_methods_reject_riskless_asset(fn):
+    with pytest.raises(ValueError, match="zero variance"):
+        fn(np.diag([0.0, 0.04, 0.09]))
+
+
 def test_hrp_works_on_singular_covariance():
     X = np.random.default_rng(2).normal(size=(10, 20))     # 10 obs, 20 assets: rank-deficient
     w = hrp(np.cov(X, rowvar=False))

@@ -64,6 +64,8 @@ def fit_garch(r, demean: bool = True) -> GarchParams:
     if demean:
         r = r - r.mean()
     v = float(np.var(r))
+    if v <= 0:
+        raise ValueError("returns have zero variance; GARCH is undefined")
     best = None
     for a0, b0 in ((0.05, 0.90), (0.10, 0.85), (0.03, 0.95)):
         x0 = [v * (1 - a0 - b0), a0, b0]

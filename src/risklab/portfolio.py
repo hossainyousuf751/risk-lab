@@ -13,12 +13,19 @@ from scipy.optimize import minimize
 from scipy.spatial.distance import pdist
 
 
+def _require_positive_variance(cov: np.ndarray) -> None:
+    # Risk-based weights scale with 1/risk, so a riskless asset (e.g. cash) would get infinite weight.
+    if np.any(np.diag(cov) <= 0):
+        raise ValueError("cov has an asset with zero variance; risk-based weights are undefined for it")
+
+
 def equal_weight(cov: np.ndarray) -> np.ndarray:
     n = cov.shape[0]
     return np.full(n, 1 / n)
 
 
 def inverse_variance(cov: np.ndarray) -> np.ndarray:
+    _require_positive_variance(cov)
     iv = 1 / np.diag(cov)
     return iv / iv.sum()
 
@@ -46,6 +53,7 @@ def risk_parity(cov: np.ndarray, budget: np.ndarray | None = None) -> np.ndarray
 
     Minimise 0.5 y'Cov y - sum(b_i ln y_i) over y > 0, then w = y / sum(y).
     """
+    _require_positive_variance(cov)
     n = cov.shape[0]
     b = np.full(n, 1 / n) if budget is None else np.asarray(budget, dtype=float)
     y0 = 1 / np.sqrt(np.diag(cov))
@@ -75,6 +83,7 @@ def hrp(cov: np.ndarray, order: np.ndarray | None = None) -> np.ndarray:
     rebalances, not from the bisection weights (Study 2). Passing an order
     computed less often than you rebalance removes most of it.
     """
+    _require_positive_variance(cov)
     order = hrp_order(cov) if order is None else order
     w = np.ones(len(order))
     clusters = [list(order)]

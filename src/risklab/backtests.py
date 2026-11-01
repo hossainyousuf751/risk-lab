@@ -24,6 +24,8 @@ def kupiec_pof(exceptions, alpha: float) -> tuple[float, float]:
     """Proportion-of-failures likelihood ratio test. Returns (LR, p-value), chi2(1)."""
     e = np.asarray(exceptions, dtype=bool)
     n, x = len(e), int(e.sum())
+    if n == 0:
+        raise ValueError("exceptions is empty")
     lr = -2 * (_loglik_bernoulli(n - x, x, alpha) - _loglik_bernoulli(n - x, x, x / n))
     return float(lr), float(stats.chi2.sf(lr, 1))
 

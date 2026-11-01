@@ -16,6 +16,11 @@ def test_kupiec_accepts_correct_rate_and_rejects_wrong():
     assert kupiec_pof(too_many, 0.01)[1] < 0.001
 
 
+def test_kupiec_rejects_empty_input():
+    with pytest.raises(ValueError):
+        kupiec_pof([], 0.01)
+
+
 def test_kupiec_zero_exceptions():
     lr, p = kupiec_pof(np.zeros(1000, dtype=bool), 0.01)
     assert lr == pytest.approx(-2 * 1000 * np.log(0.99))

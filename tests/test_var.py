@@ -20,6 +20,11 @@ def test_garch_fit_recovers_parameters():
     assert p.beta == pytest.approx(0.90, abs=0.03)
 
 
+def test_garch_rejects_constant_returns():
+    with pytest.raises(ValueError, match="zero variance"):
+        fit_garch(np.zeros(100))
+
+
 def test_true_var_and_es_match_monte_carlo():
     sim = simulate_garch_t(400_000, params=GarchParams(1e-4, 0.0, 0.0), nu=5, mu=0.0, seed=3, start=None)
     r = sim["r"]
