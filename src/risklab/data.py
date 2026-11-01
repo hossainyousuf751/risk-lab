@@ -12,11 +12,13 @@ TRADING_DAYS = 252
 
 
 def simulate_garch_t(n: int = 3000, params: GarchParams = GarchParams(2e-6, 0.08, 0.90), nu: float = 5.0,
-                     mu: float = 0.0003, seed: int | None = 0, start: str = "2014-01-01") -> pd.DataFrame:
+                     mu: float = 0.0003, seed: int | None = 0, start: str | None = "2014-01-01") -> pd.DataFrame:
     """Daily returns with GARCH(1,1) volatility and standardised Student-t innovations.
 
     Returns a DataFrame with columns r (return) and sigma (true conditional vol),
-    so the true VaR and ES on every day are known exactly.
+    so the true VaR and ES on every day are known exactly. Business-day index
+    from `start`, or a plain integer index if start is None (needed for long
+    simulations: pandas < 3 dates end in 2262).
     """
     rng = np.random.default_rng(seed)
     z = rng.standard_t(nu, n) / np.sqrt(nu / (nu - 2))
@@ -27,7 +29,7 @@ def simulate_garch_t(n: int = 3000, params: GarchParams = GarchParams(2e-6, 0.08
         if t:
             s2[t] = params.omega + params.alpha * (r[t - 1] - mu) ** 2 + params.beta * s2[t - 1]
         r[t] = mu + np.sqrt(s2[t]) * z[t]
-    idx = pd.bdate_range(start, periods=n)
+    idx = pd.RangeIndex(n) if start is None else pd.bdate_range(start, periods=n)
     out = pd.DataFrame({"r": r, "sigma": np.sqrt(s2)}, index=idx)
     out.attrs.update(nu=nu, mu=mu)
     return out

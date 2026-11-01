@@ -21,7 +21,7 @@ def test_garch_fit_recovers_parameters():
 
 
 def test_true_var_and_es_match_monte_carlo():
-    sim = simulate_garch_t(400_000, params=GarchParams(1e-4, 0.0, 0.0), nu=5, mu=0.0, seed=3)
+    sim = simulate_garch_t(400_000, params=GarchParams(1e-4, 0.0, 0.0), nu=5, mu=0.0, seed=3, start=None)
     r = sim["r"]
     assert true_garch_t_var(sim, 0.01).iloc[0] == pytest.approx(-np.quantile(r, 0.01), rel=0.02)
     q = np.quantile(r, 0.025)
