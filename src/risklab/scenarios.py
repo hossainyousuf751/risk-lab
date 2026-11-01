@@ -46,10 +46,12 @@ class Scenario:
     def spot(self, i: int) -> np.ndarray:
         """Spot multipliers of underlying i, shape (n_scenarios,)."""
         m = np.asarray(self.spot_mult, dtype=float)
-        return np.atleast_1d(m if m.ndim < 2 else m[:, i])
+        return np.broadcast_to(m if m.ndim < 2 else m[:, i], (len(self),))
 
     def __len__(self) -> int:
-        return len(np.atleast_1d(np.asarray(self.spot_mult, dtype=float)))
+        """Batch size: the longest of spot_mult (rows), vol_shift and skew_shift; scalars broadcast."""
+        m = np.asarray(self.spot_mult, dtype=float)
+        return max(m.shape[0] if m.ndim else 1, np.size(self.vol_shift), np.size(self.skew_shift))
 
 
 class Position(Protocol):

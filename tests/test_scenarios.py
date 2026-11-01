@@ -88,3 +88,11 @@ def test_any_object_with_value_is_a_position():
 
     res = full_revaluation_var([Digital()], Scenario(spot_mult=np.linspace(0.9, 1.1, 101)), alpha=0.25)
     assert res["var"] == pytest.approx(0.0) and res["pnl"].min() == 0.0
+
+
+def test_a_vol_only_batch_has_the_length_of_its_shifts():
+    sc = Scenario(vol_shift=np.array([0.0, 0.05, 0.10]))
+    assert len(sc) == 3 and sc.spot(0).shape == (3,)
+    straddle = Portfolio(100.0, 0.2, options=STRADDLE)
+    v = straddle.value(sc)
+    assert v.shape == (3,) and v[0] < v[1] < v[2]
