@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1 (2026-11-11)
+
+First release on PyPI, as `marketrisk-lab` (`pip install marketrisk-lab`): the name `risklab` is
+taken on PyPI by an unrelated project. The import name is unchanged (`import risklab`). No code
+changes; every result is identical to 0.4.0.
+- Licence metadata as an SPDX expression with `LICENSE` included, and the repository URL.
+- `publish` workflow: a version bump merged to main tags, releases and uploads to PyPI.
+- README links and images are absolute, so they work on PyPI.
+
 ## 0.4.0 (2026-11-01)
 
 ### Added

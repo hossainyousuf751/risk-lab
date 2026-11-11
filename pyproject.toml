@@ -1,15 +1,19 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "risklab"
-version = "0.4.0"
+name = "marketrisk-lab"
+version = "0.4.1"
 description = "VaR/ES estimation and backtesting, and robust portfolio construction"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24", "scipy>=1.10", "pandas>=2.0"]
+
+[project.urls]
+Repository = "https://github.com/hossainyousuf751/risk-lab"
 
 [project.optional-dependencies]
 plot = ["matplotlib>=3.7"]
