@@ -14,7 +14,8 @@ Market risk and portfolio construction, each validated against a known truth:
   estimation error degrades each.
 
 ```bash
-pip install -e ".[dev]"
+pip install marketrisk-lab                 # from PyPI; the import is still `import risklab`
+pip install -e ".[dev]"                    # or, from a clone, for development
 pytest
 cd examples
 python 01_var_backtesting.py && python 02_portfolio_construction.py && python 03_option_var.py
@@ -60,7 +61,7 @@ For 97.5% Expected Shortfall, the Acerbi–Székely Z2 statistic rejects the nor
 (−0.93, below the −0.70 threshold), puts EWMA at the edge (−0.67), and accepts filtered
 historical simulation (−0.23, close to the true model's −0.31).
 
-![VaR paths](docs/var_paths.png)
+![VaR paths](https://raw.githubusercontent.com/hossainyousuf751/risk-lab/main/docs/var_paths.png)
 
 ## Study 2: estimation error in portfolio construction
 
@@ -82,7 +83,7 @@ Because the truth is known, each portfolio's real risk is computed exactly as w�
 
 The true minimum-variance portfolio has 6.7% volatility.
 
-![True vol](docs/portfolio_true_vol.png)
+![True vol](https://raw.githubusercontent.com/hossainyousuf751/risk-lab/main/docs/portfolio_true_vol.png)
 
 **With 60 days of data for 50 assets, sample min-variance is worse than 1/N** and trades
 six times its capital every month chasing noise. Ledoit–Wolf shrinkage (intensity 0.16 here)
@@ -226,8 +227,8 @@ risk-lab installs and tests on its own.
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for workflow and responsibilities and
-[docs/CONVENTIONS.md](docs/CONVENTIONS.md) for the technical rules. Every method must be validated
+See [CONTRIBUTING.md](https://github.com/hossainyousuf751/risk-lab/blob/main/CONTRIBUTING.md) for workflow and responsibilities and
+[docs/CONVENTIONS.md](https://github.com/hossainyousuf751/risk-lab/blob/main/docs/CONVENTIONS.md) for the technical rules. Every method must be validated
 against a known truth.
 
 ## References
@@ -246,4 +247,4 @@ against a known truth.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT. See [LICENSE](https://github.com/hossainyousuf751/risk-lab/blob/main/LICENSE).

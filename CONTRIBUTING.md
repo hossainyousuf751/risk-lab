@@ -59,8 +59,16 @@ asks "what is the known truth this is tested against?" on every new method.
 
 ## Releases
 
-Bump `version` in `pyproject.toml` (semver: new public function → minor, fix → patch), tag
-`vX.Y.Z` on `main`, and summarise the milestone in the GitHub release notes.
+Bump `version` in `pyproject.toml` (semver: new public function → minor, fix → patch) and add a
+`## X.Y.Z (date)` section to `CHANGELOG.md` in the same PR. When it merges, `.github/workflows/publish.yml`
+builds the package, creates the `vX.Y.Z` tag and GitHub release (notes = that changelog section) and
+uploads to PyPI. It does nothing if the version is already tagged, and stops before releasing anything if
+the changelog section is missing. PyPI versions cannot be re-uploaded, so a mistake means a new patch.
+
+The PyPI project is `marketrisk-lab` (the name `risklab` belongs to an unrelated project); the import name
+stays `risklab`. One-time PyPI setup (trusted publishing, no token): on pypi.org, *Your account →
+Publishing → Add a new pending publisher* with project `marketrisk-lab`, owner `hossainyousuf751`,
+repository `risk-lab`, workflow `publish.yml`, environment `pypi`.
 
 ## Working with AI agents
 
